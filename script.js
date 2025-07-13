@@ -1,7 +1,7 @@
 let crafts = [];
 let pendingCrafts = JSON.parse(localStorage.getItem('pendingCrafts')) || [];
 
-const ADMIN_PASSWORD = "monSuperMotDePasse"; // Change-le !
+const ADMIN_PASSWORD = "1984"; // Change-le !
 const ADMIN_DURATION_HOURS = 48;
 
 // Charger les crafts officiels
