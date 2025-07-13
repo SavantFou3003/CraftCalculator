@@ -4,73 +4,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Craft Calculator</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Conventional Missile x3 - Craft</h1>
-  
-  <table id="craftTable">
-    <thead>
-      <tr>
-        <th>Item final</th>
-        <th>Quantité</th>
-        <th>Sous-composant</th>
-        <th>Quantité nécessaire</th>
-        <th>Remarques / Craft</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Conventional Missile</td>
-        <td>3</td>
-        <td>Plan T1</td>
-        <td>6</td>
-        <td>-</td>
-      </tr>
-      <tr>
-        <td></td>
-        <td></td>
-        <td>Warhead T1</td>
-        <td>6</td>
-        <td>-</td>
-      </tr>
-      <tr>
-        <td></td>
-        <td></td>
-        <td>Cactus green</td>
-        <td>180</td>
-        <td>Nécessite 22.5 green shrub, 22.5 fioles d'eau, 22.5 redstone</td>
-      </tr>
-      <tr>
-        <td></td>
-        <td></td>
-        <td>Dandelion yellow</td>
-        <td>30</td>
-        <td>Comme cactus green mais avec fleur jaune</td>
-      </tr>
-      <tr>
-        <td></td>
-        <td></td>
-        <td>Basic circuit</td>
-        <td>3</td>
-        <td>Pour chaque circuit : 4 redstone, 4 comparateurs, 1 steel plate</td>
-      </tr>
-      <tr>
-        <td></td>
-        <td></td>
-        <td>TNT</td>
-        <td>30</td>
-        <td>Nécessite 120 sable et 150 poudre à canon</td>
-      </tr>
-    </tbody>
-  </table>
-  
-  <div class="buttons">
-    <button onclick="downloadExcel()">📥 Télécharger en Excel (.xlsx)</button>
-    <button onclick="downloadCSV()">📥 Télécharger en CSV</button>
+  <h1>Craft Calculator</h1>
+
+  <div id="admin-area">
+    <input type="password" id="admin-password" placeholder="Mot de passe admin">
+    <button onclick="loginAdmin()">Activer admin</button>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <h2>Ajouter un craft proposé</h2>
+  <form id="add-craft-form">
+    <input type="text" id="new-item-name" placeholder="Nom de l'item" required />
+    <input type="number" id="new-item-quantity" placeholder="Quantité" required />
+    <textarea id="new-item-components" placeholder="Composants (nom;quantité;note par ligne)" required></textarea>
+    <button type="submit">Proposer</button>
+  </form>
+
+  <h2>Crafts officiels</h2>
+  <table id="craft-table"></table>
+
+  <h2>Propositions en attente</h2>
+  <div id="pending-list"></div>
+  <button id="validate-btn" onclick="validatePending()" style="display:none;">Valider ces crafts</button>
+
+  <button onclick="downloadCSV()">Télécharger CSV</button>
   <script src="script.js"></script>
 </body>
 </html>
