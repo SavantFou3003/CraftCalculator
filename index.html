@@ -2,31 +2,75 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Craft Calculator</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Craft Calculator</h1>
-    <div class="input-group">
-      <label for="itemSelect">Sélectionnez un item :</label>
-      <select id="itemSelect">
-        <option value="warhead_t1">Warhead T1</option>
-        <option value="warhead_t2">Warhead T2</option>
-        <option value="warhead_t3">Warhead T3</option>
-        <option value="conventional_missile">Conventional Missile</option>
-      </select>
-    </div>
-    <div class="input-group">
-      <label for="quantity">Quantité :</label>
-      <input type="number" id="quantity" value="1" min="1" />
-    </div>
-    <button onclick="calculateCraft()">Calculer</button>
-
-    <div id="results" class="results"></div>
+  <h1>Conventional Missile x3 - Craft</h1>
+  
+  <table id="craftTable">
+    <thead>
+      <tr>
+        <th>Item final</th>
+        <th>Quantité</th>
+        <th>Sous-composant</th>
+        <th>Quantité nécessaire</th>
+        <th>Remarques / Craft</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Conventional Missile</td>
+        <td>3</td>
+        <td>Plan T1</td>
+        <td>6</td>
+        <td>-</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td>Warhead T1</td>
+        <td>6</td>
+        <td>-</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td>Cactus green</td>
+        <td>180</td>
+        <td>Nécessite 22.5 green shrub, 22.5 fioles d'eau, 22.5 redstone</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td>Dandelion yellow</td>
+        <td>30</td>
+        <td>Comme cactus green mais avec fleur jaune</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td>Basic circuit</td>
+        <td>3</td>
+        <td>Pour chaque circuit : 4 redstone, 4 comparateurs, 1 steel plate</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td>TNT</td>
+        <td>30</td>
+        <td>Nécessite 120 sable et 150 poudre à canon</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <div class="buttons">
+    <button onclick="downloadExcel()">📥 Télécharger en Excel (.xlsx)</button>
+    <button onclick="downloadCSV()">📥 Télécharger en CSV</button>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
