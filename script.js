@@ -31,3 +31,12 @@ function calculateCraft() {
 
   document.getElementById('results').textContent = output;
 }
+function downloadExcel() {
+  var wb = XLSX.utils.table_to_book(document.getElementById('craftTable'), {sheet:"Craft"});
+  XLSX.writeFile(wb, 'Conventional_Missile_Craft.xlsx');
+}
+
+function downloadCSV() {
+  var wb = XLSX.utils.table_to_book(document.getElementById('craftTable'), {sheet:"Craft"});
+  XLSX.writeFile(wb, 'Conventional_Missile_Craft.csv');
+}
