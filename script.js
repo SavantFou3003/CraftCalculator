@@ -1,103 +1,87 @@
-let crafts = [];
+let isAdmin = false;
+// SHA-256 du mot de passe "monSuperMotDePasse"
+const adminHash = "4cb59c4f58837c3b1d6d6f4a4663a88e946e97e659fdb12e4df79e95e86e9302";
+
+const craftForm = document.getElementById('craftForm');
+const pendingList = document.getElementById('pendingCrafts');
+const validatedList = document.getElementById('validatedCrafts');
+
 let pendingCrafts = JSON.parse(localStorage.getItem('pendingCrafts')) || [];
+let validatedCrafts = JSON.parse(localStorage.getItem('validatedCrafts')) || [];
 
-const ADMIN_PASSWORD = "1984"; // Change-le !
-const ADMIN_DURATION_HOURS = 48;
+function saveData() {
+  localStorage.setItem('pendingCrafts', JSON.stringify(pendingCrafts));
+  localStorage.setItem('validatedCrafts', JSON.stringify(validatedCrafts));
+}
 
-// Charger les crafts officiels
-fetch('crafts.json')
-  .then(res => res.json())
-  .then(data => {
-    crafts = data;
-    displayCrafts();
-    displayPending();
-    checkAdminStatus();
+function renderLists() {
+  pendingList.innerHTML = '';
+  validatedList.innerHTML = '';
+
+  pendingCrafts.forEach((craft, index) => {
+    const li = document.createElement('li');
+    li.textContent = craft.item + ": " + craft.recipe;
+
+    if (isAdmin) {
+      const validateBtn = document.createElement('button');
+      validateBtn.textContent = "Valider";
+      validateBtn.onclick = () => validateCraft(index);
+      li.appendChild(validateBtn);
+    }
+
+    pendingList.appendChild(li);
   });
 
-function displayCrafts() {
-  const table = document.getElementById('craft-table');
-  table.innerHTML = "";
-  crafts.forEach(craft => {
-    let rows = `<tr><th colspan="3">${craft.item} x${craft.quantity}</th></tr>`;
-    rows += `<tr><th>Composant</th><th>Quantité</th><th>Note</th></tr>`;
-    craft.components.forEach(comp => {
-      rows += `<tr><td>${comp.name}</td><td>${comp.quantity}</td><td>${comp.note}</td></tr>`;
-    });
-    table.innerHTML += rows;
+  validatedCrafts.forEach(craft => {
+    const li = document.createElement('li');
+    li.textContent = craft.item + ": " + craft.recipe;
+    validatedList.appendChild(li);
   });
 }
 
-function displayPending() {
-  const list = document.getElementById('pending-list');
-  list.innerHTML = "";
-  pendingCrafts.forEach((craft, idx) => {
-    list.innerHTML += `<div><strong>${craft.item} x${craft.quantity}</strong> <button onclick="removePending(${idx})">Supprimer</button></div>`;
-  });
+function validateCraft(index) {
+  validatedCrafts.push(pendingCrafts[index]);
+  pendingCrafts.splice(index, 1);
+  saveData();
+  renderLists();
 }
 
-document.getElementById('add-craft-form').addEventListener('submit', e => {
+async function activateAdmin() {
+  const entered = document.getElementById('adminPassword').value;
+  const status = document.getElementById('adminStatus');
+
+  const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(entered));
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+  if (hashHex === adminHash) {
+    isAdmin = true;
+    status.textContent = "Mode admin activé (48h)";
+    localStorage.setItem('adminActivatedAt', Date.now());
+    renderLists();
+  } else {
+    status.textContent = "Mot de passe incorrect";
+  }
+}
+
+function checkAdminDuration() {
+  const activatedAt = localStorage.getItem('adminActivatedAt');
+  if (activatedAt && Date.now() - activatedAt < 48 * 3600 * 1000) {
+    isAdmin = true;
+  } else {
+    isAdmin = false;
+  }
+}
+
+craftForm.onsubmit = (e) => {
   e.preventDefault();
-  const item = document.getElementById('new-item-name').value;
-  const quantity = parseInt(document.getElementById('new-item-quantity').value);
-  const componentsText = document.getElementById('new-item-components').value.trim();
-  const components = componentsText.split('\n').map(line => {
-    const parts = line.split(';');
-    return { name: parts[0], quantity: parseInt(parts[1]), note: parts[2] || "-" };
-  });
-  pendingCrafts.push({ item, quantity, components });
-  localStorage.setItem('pendingCrafts', JSON.stringify(pendingCrafts));
-  displayPending();
-  e.target.reset();
-});
-
-function removePending(idx) {
-  pendingCrafts.splice(idx,1);
-  localStorage.setItem('pendingCrafts', JSON.stringify(pendingCrafts));
-  displayPending();
+  const item = document.getElementById('itemName').value;
+  const recipe = document.getElementById('itemRecipe').value;
+  pendingCrafts.push({ item, recipe });
+  saveData();
+  craftForm.reset();
+  renderLists();
 }
 
-function loginAdmin() {
-  const pw = document.getElementById('admin-password').value;
-  if (pw === ADMIN_PASSWORD) {
-    const expireTime = new Date().getTime() + ADMIN_DURATION_HOURS * 3600 * 1000;
-    localStorage.setItem('adminExpire', expireTime);
-    checkAdminStatus();
-    alert("Mode admin activé !");
-  } else {
-    alert("Mot de passe incorrect");
-  }
-}
-
-function checkAdminStatus() {
-  const expire = parseInt(localStorage.getItem('adminExpire') || "0");
-  if (new Date().getTime() < expire) {
-    document.getElementById('validate-btn').style.display = 'inline';
-  } else {
-    document.getElementById('validate-btn').style.display = 'none';
-  }
-}
-
-function validatePending() {
-  crafts = crafts.concat(pendingCrafts);
-  pendingCrafts = [];
-  localStorage.setItem('pendingCrafts', JSON.stringify(pendingCrafts));
-  displayCrafts();
-  displayPending();
-  alert("Crafts validés !");
-}
-
-function downloadCSV() {
-  let csv = "Item;Quantité;Composant;Quantité;Note\n";
-  crafts.forEach(craft => {
-    craft.components.forEach(comp => {
-      csv += `${craft.item};${craft.quantity};${comp.name};${comp.quantity};${comp.note}\n`;
-    });
-  });
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = "crafts.csv";
-  a.click();
-  URL.revokeObjectURL(url);
-}
+checkAdminDuration();
+renderLists();
