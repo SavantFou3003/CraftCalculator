@@ -1,6 +1,6 @@
 let isAdmin = false;
 // SHA-256 du mot de passe "monSuperMotDePasse"
-const adminHash = "4cb59c4f58837c3b1d6d6f4a4663a88e946e97e659fdb12e4df79e95e86e9302";
+const adminHash = "87f29a7d74534506aa0736198b6fd969a66e89ccd83d85dd32b4f7351c5b6d8d";
 
 const craftForm = document.getElementById('craftForm');
 const pendingList = document.getElementById('pendingCrafts');
