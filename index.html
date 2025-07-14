@@ -4,32 +4,33 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Craft Calculator</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <h1>Craft Calculator</h1>
 
-  <div id="admin-area">
-    <input type="password" id="admin-password" placeholder="Mot de passe admin">
-    <button onclick="loginAdmin()">Activer admin</button>
-  </div>
-
-  <h2>Ajouter un craft proposé</h2>
-  <form id="add-craft-form">
-    <input type="text" id="new-item-name" placeholder="Nom de l'item" required />
-    <input type="number" id="new-item-quantity" placeholder="Quantité" required />
-    <textarea id="new-item-components" placeholder="Composants (nom;quantité;note par ligne)" required></textarea>
-    <button type="submit">Proposer</button>
+  <h2>Ajouter un nouveau craft</h2>
+  <form id="craftForm">
+    <input type="text" id="itemName" placeholder="Nom de l'item" required>
+    <div id="components"></div>
+    <button type="button" onclick="addComponent()">➕ Ajouter composant</button>
+    <button type="submit">✅ Proposer le craft</button>
   </form>
 
-  <h2>Crafts officiels</h2>
-  <table id="craft-table"></table>
+  <h2>Crafts proposés (en attente de validation)</h2>
+  <ul id="pendingCrafts"></ul>
 
-  <h2>Propositions en attente</h2>
-  <div id="pending-list"></div>
-  <button id="validate-btn" onclick="validatePending()" style="display:none;">Valider ces crafts</button>
+  <h2>Crafts validés</h2>
+  <ul id="validatedCrafts"></ul>
 
-  <button onclick="downloadCSV()">Télécharger CSV</button>
+  <div id="adminSection">
+    <h3>Mode admin</h3>
+    <input type="password" id="adminPassword" placeholder="Mot de passe admin">
+    <button onclick="activateAdmin()">Activer le mode admin</button>
+    <p id="adminStatus"></p>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>
+s
