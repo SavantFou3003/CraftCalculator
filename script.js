@@ -1,10 +1,6 @@
 let isAdmin = false;
-// SHA-256 du mot de passe "monSuperMotDePasse"
-const adminHash = "87f29a7d74534506aa0736198b6fd969a66e89ccd83d85dd32b4f7351c5b6d8d";
-
-const craftForm = document.getElementById('craftForm');
-const pendingList = document.getElementById('pendingCrafts');
-const validatedList = document.getElementById('validatedCrafts');
+// hash SHA-256 de "monSuperMotDePasse"
+const adminHash = "4cb59c4f58837c3b1d6d6f4a4663a88e946e97e659fdb12e4df79e95e86e9302";
 
 let pendingCrafts = JSON.parse(localStorage.getItem('pendingCrafts')) || [];
 let validatedCrafts = JSON.parse(localStorage.getItem('validatedCrafts')) || [];
@@ -15,35 +11,59 @@ function saveData() {
 }
 
 function renderLists() {
+  const pendingList = document.getElementById('pendingCrafts');
+  const validatedList = document.getElementById('validatedCrafts');
   pendingList.innerHTML = '';
   validatedList.innerHTML = '';
 
   pendingCrafts.forEach((craft, index) => {
     const li = document.createElement('li');
-    li.textContent = craft.item + ": " + craft.recipe;
-
+    li.innerHTML = `<b>${craft.name}</b><br>${formatComponents(craft.components)}`;
     if (isAdmin) {
-      const validateBtn = document.createElement('button');
-      validateBtn.textContent = "Valider";
-      validateBtn.onclick = () => validateCraft(index);
-      li.appendChild(validateBtn);
+      const btn = document.createElement('button');
+      btn.textContent = "Valider";
+      btn.onclick = () => validateCraft(index);
+      li.appendChild(btn);
     }
-
     pendingList.appendChild(li);
   });
 
   validatedCrafts.forEach(craft => {
     const li = document.createElement('li');
-    li.textContent = craft.item + ": " + craft.recipe;
+    li.innerHTML = `<b>${craft.name}</b><br>${formatComponents(craft.components)}`;
     validatedList.appendChild(li);
   });
 }
 
-function validateCraft(index) {
-  validatedCrafts.push(pendingCrafts[index]);
-  pendingCrafts.splice(index, 1);
-  saveData();
-  renderLists();
+function formatComponents(components) {
+  return components.map(c =>
+    `- ${c.item} x${c.quantity}` +
+    (c.subcomponents.length > 0 ? 
+      '<br>' + c.subcomponents.map(sub => `&nbsp;&nbsp;- ${sub.item} x${sub.quantity}`).join('<br>') 
+      : '')
+  ).join('<br>');
+}
+
+function addComponent() {
+  const container = document.createElement('div');
+  container.className = 'component';
+  container.innerHTML = `
+    <input type="text" placeholder="Nom du composant" class="comp-name" required>
+    <input type="number" placeholder="Quantité" class="comp-qty" required>
+    <button type="button" onclick="addSubcomponent(this)">➕ Sous-composant</button>
+    <div class="subcomponents"></div>
+  `;
+  document.getElementById('components').appendChild(container);
+}
+
+function addSubcomponent(btn) {
+  const subContainer = document.createElement('div');
+  subContainer.className = 'subcomponent';
+  subContainer.innerHTML = `
+    <input type="text" placeholder="Nom sous-composant" class="sub-name" required>
+    <input type="number" placeholder="Quantité" class="sub-qty" required>
+  `;
+  btn.nextElementSibling.appendChild(subContainer);
 }
 
 async function activateAdmin() {
@@ -56,8 +76,8 @@ async function activateAdmin() {
 
   if (hashHex === adminHash) {
     isAdmin = true;
-    status.textContent = "Mode admin activé (48h)";
     localStorage.setItem('adminActivatedAt', Date.now());
+    status.textContent = "Mode admin activé (48h)";
     renderLists();
   } else {
     status.textContent = "Mot de passe incorrect";
@@ -68,18 +88,41 @@ function checkAdminDuration() {
   const activatedAt = localStorage.getItem('adminActivatedAt');
   if (activatedAt && Date.now() - activatedAt < 48 * 3600 * 1000) {
     isAdmin = true;
-  } else {
-    isAdmin = false;
   }
 }
 
-craftForm.onsubmit = (e) => {
-  e.preventDefault();
-  const item = document.getElementById('itemName').value;
-  const recipe = document.getElementById('itemRecipe').value;
-  pendingCrafts.push({ item, recipe });
+function validateCraft(index) {
+  validatedCrafts.push(pendingCrafts[index]);
+  pendingCrafts.splice(index, 1);
   saveData();
-  craftForm.reset();
+  renderLists();
+}
+
+document.getElementById('craftForm').onsubmit = (e) => {
+  e.preventDefault();
+  const name = document.getElementById('itemName').value;
+  const compEls = document.querySelectorAll('.component');
+  let components = [];
+
+  compEls.forEach(comp => {
+    const item = comp.querySelector('.comp-name').value;
+    const quantity = parseInt(comp.querySelector('.comp-qty').value);
+    const subEls = comp.querySelectorAll('.subcomponent');
+    let subcomponents = [];
+
+    subEls.forEach(sub => {
+      const subItem = sub.querySelector('.sub-name').value;
+      const subQty = parseInt(sub.querySelector('.sub-qty').value);
+      subcomponents.push({ item: subItem, quantity: subQty });
+    });
+
+    components.push({ item, quantity, subcomponents });
+  });
+
+  pendingCrafts.push({ name, components });
+  saveData();
+  document.getElementById('craftForm').reset();
+  document.getElementById('components').innerHTML = '';
   renderLists();
 }
 
